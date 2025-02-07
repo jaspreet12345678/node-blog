@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import Post from '../../models/post';
+import { Op } from 'sequelize';
+import Tag from '../../models/tag';
 
 export class PostController {
   // **Create Post**
@@ -19,16 +21,53 @@ export class PostController {
 
   // **Get All Posts**
   static async getAllPosts(req: Request, res: Response) {
+    // try {
+    //   const posts = await Post.findAll({
+    //     include: ['User'], // Include user details
+    //     order: [['createdAt', 'DESC']], // Latest posts first
+    //   });
+    //   res.json(posts);
+    // } catch (error) {
+    //   console.error(error);
+    //   res.status(500).json({ error: 'Error fetching posts' });
+    // }
+
     try {
-      const posts = await Post.findAll({
-        include: ['User'], // Include user details
-        order: [['createdAt', 'DESC']], // Latest posts first
-      });
-      res.json(posts);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Error fetching posts' });
-    }
+        const { search, tag } = req.query;
+  
+        let whereClause: any = {};
+  
+        if (search) {
+          whereClause[Op.or] = [
+            { title: { [Op.like]: `%${search}%` } },
+            { content: { [Op.like]: `%${search}%` } },
+          ];
+        }
+  
+        let posts;
+        if (tag) {
+          // Search posts by tag
+          posts = await Post.findAll({
+            where: whereClause,
+            include: [
+              { model: Tag, where: { name: tag }, required: true },
+            ],
+            order: [['createdAt', 'DESC']],
+          });
+        } else {
+          // Regular search
+          posts = await Post.findAll({
+            where: whereClause,
+            include: [Tag],
+            order: [['createdAt', 'DESC']],
+          });
+        }
+  
+        res.json(posts);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching posts' });
+      }
   }
 
   // **Get a Single Post**

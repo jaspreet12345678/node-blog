@@ -1,6 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database';
 import User from './user';
+import Tag from './tag';
 
 
 class Post extends Model {
@@ -39,5 +40,7 @@ Post.init(
 );
 
 Post.belongsTo(User, { foreignKey: 'userId' });
+Post.belongsToMany(Tag, { through: 'PostTags', foreignKey: 'postId' });
+Tag.belongsToMany(Post, { through: 'PostTags', foreignKey: 'tagId' });
 
 export default Post;

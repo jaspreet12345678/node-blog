@@ -46,6 +46,8 @@ router.post(
   }
 );
 
+router.get('/', PostController.getAllPosts);
+
 router.get(
   "/:postId/comments",
   (req: Request, res: Response, next: NextFunction) => {
