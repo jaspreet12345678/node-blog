@@ -17,7 +17,7 @@ export default function authMiddleware(req: Request, res: Response, next: NextFu
     const verified = jwt.verify(token, JWT_SECRET);
     (req as any).user = verified;
     next();
-  } catch (error) {
+  } catch (error) {  
     res.status(401).json({ error: 'Invalid Token' });
   }
 }
